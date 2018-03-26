@@ -1,1 +1,1 @@
-: mod2 2 % if ." no\n" else ." yes\n" then ;
+: mod2 dup 2 % not ;
