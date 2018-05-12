@@ -33,12 +33,12 @@ Programming: C, Assembly, and Program Execution on Intel x86-64 Architecture"](h
 * `dup` ( a -- a a )
 * `rot` ( a b c -- b c a )
 * Arithmetic:
-  * `+` ( y x -- [ x + y ] )
-  * `*` ( y x -- [ x * y ] )
-  * `/` ( y x -- [ x / y ] )
-  * `%` ( y x -- [ x mod y ] )
-  * `-` ( y x -- [x - y] )
-  * `<` ( y x -- [x < y] )
+  * `+` ( x y-- [ x + y ] )
+  * `*` ( x y-- [ x * y ] )
+  * `/` ( x y-- [ x / y ] )
+  * `%` ( x y-- [ x mod y ] )
+  * `-` ( x y-- [x - y] )
+  * `<` ( x y-- [x < y] )
 * Logic:
   * `not` ( a -- a' )
     a' = 0 if a != 0
@@ -142,12 +142,12 @@ Prints a certain amount of characters from string.
   ( addr -- value )
   Fetch value from memory.
 * `!`
-  ( addr val -- ) 
+  ( val addr -- ) 
   Store value by address.
-* `!c`
-  ( addr char -- ) 
+* `c!`
+  ( char addr -- ) 
   Store one byte by address.
-* `@c`
+* `c@`
   ( addr -- char )
   Read one byte starting at addr.
 * `,`
