@@ -10,9 +10,6 @@
 ;
 ; ------------------------------------------------
 
-
-; Read word and place its address on stack
-; ( -- a )
 colon "'", tick, 1
 	dq xt_inbuf
 	dq xt_word
@@ -33,14 +30,10 @@ colon "'", tick, 1
     dq xt_lit, msg_no_such_word, xt_prints
     dq xt_exit
 
-; Drop TOS
-; ( a -- )
 native "drop", drop
     add rsp, 8
     jmp next
 
-; Swap two cells on top of the stack
-; ( a b -- b a )
 native "swap", swap
     pop rax
     pop rdx
@@ -48,19 +41,17 @@ native "swap", swap
     push rdx
     jmp next
 
-; Duplicate cell on top of the stack
-; ( a -- a a )
 native "dup", dup
-    push qword [rsp]
+    pop rax
+    push rax 
+    push rax
     jmp next
 
-; ( y x -- [ x + y ] )
 native "+", plus
     pop rax
     add [rsp], rax
     jmp next
 
-; ( y x -- [ x * y ] )
 native "*", mul
     pop rax
     pop rdx
@@ -68,7 +59,6 @@ native "*", mul
     push rax
     jmp next
 
-; ( y x -- [ x / y ] )
 native "/", div
     pop rcx
     pop rax
@@ -77,7 +67,6 @@ native "/", div
     push rax
     jmp next
 
-; ( y x -- [ x mod y ] )
 native "%", mod
     pop rcx
     pop rax
@@ -86,36 +75,30 @@ native "%", mod
     push rdx
     jmp next
 
-; ( y x -- [x - y] )
 native "-", minus
     pop rax
     sub [rsp], rax
     jmp next
 
-; ( a -- a' )
-; a' = 0 if a != 0
-; a' = 1 if a == 0
 native "not", not
     pop rax
     test rax, rax
-    setz al
-    movzx rax, al
-    push rax
+    je .yes
+    push 0
+    jmp next
+    .yes: push 1
     jmp next
 
-; ( a b -- c )
-; c = 1 if a == b
-; c = 0 if a != b
 native "=", equals
     pop rax
     pop rdx
     cmp rax, rdx
-    sete al
-    movzx rax, al
-    push rax
+    je .yes
+    push 0
+    jmp next
+    .yes: push 1
     jmp next
 
-; ( y x -- [x < y] )
 native "<", lt
     pop rdx
     pop rax
@@ -125,21 +108,16 @@ native "<", lt
     push rax
     jmp next
 
-; bitwise and
-; ( y x -- y & x )
 native "and", and
     pop rax
     and [rsp], rax
     jmp next
 
-; bitwise or
-; ( y x -- y | x )
 native "or", or
     pop rax
     or [rsp], rax
     jmp next
 
-; logic and
 native "land", land
     pop rax
     pop rdx
@@ -151,7 +129,6 @@ native "land", land
     push rax
     jmp next
 
-; logic or
 native "lor", lor
     pop rax
     pop rdx
@@ -163,14 +140,11 @@ native "lor", lor
     push rax
     jmp next
 
-; Drops element from stack and sends it to stdout
-; ( a -- )
 native ".", dot
     pop rdi
     call print_int
     jmp next
-
-; Shows all stack contents. Does not pop elements
+    
 native ".S", show_stack
     mov rcx, rsp
     .loop:
@@ -293,17 +267,11 @@ native "number", number
     push rdx
     jmp next
 
-; null-terminated string length
-colon "count", count
-     dq xt_dup
- .loop:
-     dq xt_dup
-     dq xt_fetch_char
-     branch0 .exit
-     dq xt_lit, 1, xt_plus
-     branch .loop
- .exit:
-     dq xt_swap, xt_minus, xt_exit
+native "count", count
+    pop rdi
+    call string_length
+    push rax
+    jmp next
 
 
 ; prints a certain amount of symbols from string
@@ -322,10 +290,10 @@ colon "printc", printc
     dq xt_from_r, xt_drop, xt_drop, xt_exit
 
 
-; ( addr len -- )
-; Prints a null-terminated string
-colon "prints", prints
-     dq xt_dup, xt_count, xt_printc, xt_exit
+native "prints", prints
+    pop rdi
+    call print_string
+    jmp next
 
 ; Exits Forthress
 colon "bye", bye

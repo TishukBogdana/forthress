@@ -20,7 +20,7 @@ LIBS        = -ldl
 LINKER 		= gcc 
 ASMFLAGS	+= -DNATIVE_CALLS
 else
-LINKER 		= ld
+LINKER         = ld
 LINKERFLAGS = 
 LIBS        = 
 endif

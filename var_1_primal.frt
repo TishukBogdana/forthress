@@ -5,7 +5,7 @@ dup 0 < if dup 2 * - then
 repeat 
  over over  
 	dup * %
- 	if 1 + over over dup * < if 1 1 else 0 then swap
+ 	if 1 + over over dup * < if 1 1 else 0 then 
         else 0 1 then 
    until ;
  
