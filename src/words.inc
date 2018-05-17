@@ -136,32 +136,27 @@ native ".", dot
     
 native ".S", show_stack
     mov rcx, rsp
+    mov r9, [stack_base]
     .loop:
-        cmp rcx, [stack_base]
+        cmp rcx, r9
         jae next
         mov rdi, [rcx]
         push rcx
         call print_int
-        call print_newline
+        mov rdi, 0x20
+        call print_char
         pop rcx
         add rcx, 8
         jmp .loop
 
-; Stores the data stack base. It is useful for .S
 section .data
     stack_base: dq 0
-
-; Initialization routine.
+    
 native "init", init
     call setup_trap
     mov qword [state], 0
     mov rstack, rstack_start
     mov pc, interpreter_stub
-    cmp qword [stack_base], 0
-    je  .first
-    mov rsp, [stack_base]
-    jmp next
-    .first:
     mov [stack_base], rsp
     jmp next
 
@@ -188,8 +183,6 @@ native "r@", r_fetch
 ; ( str -- header_addr )
 native "find", find
     mov rsi, [last_word]
-
-    ; if compiling, we have to skip the word being defined
     mov rax, [state]
     test rax, rax
     jz .loop
