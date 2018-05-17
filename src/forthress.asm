@@ -42,7 +42,7 @@ here: dq user_dict     ; current position in words memory;
 dp: dq user_mem        ; current global data pointer 
 
 section .rodata
-msg_no_such_word: db ": no such word", 10, 0
+msg_no_such_word: db ": word not found", 10, 0
 
 section .text
 next:                  ; inner interpreter, fetches next word to execute

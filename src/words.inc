@@ -1,15 +1,3 @@
-; ------------------------------------------------
-; Forthress, a Forth dialect
-;
-; This file is storing the predefined words
-; Check README.md in the root directory for
-; word semantics
-;
-; Author: igorjirkov@gmail.com
-; Date  : 26-02-2016
-;
-; ------------------------------------------------
-
 colon "'", tick, 1
 	dq xt_inbuf
 	dq xt_word
@@ -103,9 +91,10 @@ native "<", lt
     pop rdx
     pop rax
     cmp rax, rdx
-    setl al
-    movzx rax, al
-    push rax
+    js .yes 
+    push 0 
+    jmp next
+    .yes: push 1
     jmp next
 
 native "and", and
@@ -192,7 +181,8 @@ native "r>", from_r
     jmp next
 
 native "r@", r_fetch
-    push qword [rstack]
+    mov rax, [rstack]
+    push rax
     jmp next
 
 ; ( str -- header_addr )
@@ -241,25 +231,17 @@ native "cfa", cfa
     push rsi
     jmp next
 
-
-; ( c -- )
-; Outputs a single character to stdout
 native "emit", emit
     pop rdi
     call print_char
     jmp next
 
-; ( addr -- len )
-; Reads word from stdin and stores it starting at address
-; Word length is pushed into stack
 native "word", word
     pop rdi
     call read_word
     push rdx
     jmp next
 
-; ( str -- len num )
-; Parses an integer from string
 native "number", number
     pop rdi
     call parse_int
@@ -273,38 +255,22 @@ native "count", count
     push rax
     jmp next
 
-
-; prints a certain amount of symbols from string
-; ( str cnt -- )
-colon "printc", printc
-    dq xt_to_r
-.loop:
-    dq xt_r_fetch
-    branch0 .exit
-    dq xt_dup, xt_fetch_char, xt_emit
-    dq xt_lit, 1, xt_plus
-    dq xt_from_r, xt_lit, 1, xt_minus, xt_to_r
-    branch .loop
-
-    .exit:
-    dq xt_from_r, xt_drop, xt_drop, xt_exit
-
+native "printc", printc
+  pop rdx
+  pop rsi
+  mov rdi, 1
+  mov rax, 1
+  syscall
+  jmp next
 
 native "prints", prints
     pop rdi
     call print_string
     jmp next
 
-; Exits Forthress
-colon "bye", bye
-   dq xt_lit, 60
-   dq xt_lit, 0
-   dq xt_lit, 0
-   dq xt_lit, 0
-   dq xt_lit, 0
-   dq xt_lit, 0
-   dq xt_lit, 0
-   dq xt_syscall
+native "bye", bye
+  mov rax, 60
+  syscall
 
 
 ; Only used to construct words. Implements colon-words
@@ -332,11 +298,6 @@ colon "trap", trap
     dq xt_prints, xt_lit, 10, xt_emit
     dq xt_exit
 
-
-; ( call_num a1 a2 a3 a4 a5 a6 -- new_rax new_rdx )
-; Executes syscall
-; The following registers store arguments (according to ABI)
-; rdi , rsi , rdx , r10 , r8 and r9
 native "syscall", syscall
     pop r9
     pop r8

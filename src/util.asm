@@ -35,6 +35,7 @@ print_char:
     pop rdi
     ret
 
+
 print_string:
     push rdi
     call string_length
