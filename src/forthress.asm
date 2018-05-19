@@ -1,13 +1,3 @@
-; ------------------------------------------------
-; Forthress, a Forth dialect 
-;
-; Author: igorjirkov@gmail.com
-; Date  : 15-10-2016
-;
-; This is the main Forthress file which defines the entry point
-; Please define words inside "words.inc"
-; last_word is dependent, it should be placed after all words are defined
-; ------------------------------------------------
 
 global _start
 %include "macro.inc"
@@ -19,14 +9,14 @@ global _start
 
 section .text          
 
-%include "words.inc"   ;  Predefined words are here
+%include "words.inc"  
 
 section .bss
 
-; return stack end-----;
-resq 1023              ;
-rstack_start: resq 1   ;
-; return stack start---;
+; return stack end;
+resq 1023              
+rstack_start: resq 1   
+; return stack start;
 
 input_buf: resb 1024   ; buffer to read textual words into
 user_dict:  resq 65536 ; data for words
@@ -45,7 +35,7 @@ section .rodata
 msg_no_such_word: db ": word not found", 10, 0
 
 section .text
-next:                  ; inner interpreter, fetches next word to execute
+next:                  
     mov w, pc
     add pc, 8
     mov w, [w]
@@ -54,9 +44,6 @@ next:                  ; inner interpreter, fetches next word to execute
 _start: 
     jmp i_init
 
-; ------------------------------------------------
-; This part sets up SIGSEGV handler
-; ------------------------------------------------
 
 %define SA_RESTORER 0x04000000
 %define SA_SIGINFO  0x00000004
