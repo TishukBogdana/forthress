@@ -229,6 +229,12 @@ until
 compnumber
 ; IMMEDIATE
 
+: send
+	cell% allot
+	dup
+	rot swap
+	! 
+;
 
 ( File I/O )
 : O_APPEND 0x 400 ;
@@ -299,4 +305,5 @@ include managed-string.frt
 include fib.frt
 
 include native.frt
+include mathlib.frt
 

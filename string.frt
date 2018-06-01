@@ -71,4 +71,21 @@ then
 
 : string-empty? ( str - 0 1 ) 
     c@ 0 = ; 
-
+( concat )
+: cp ( copies chars )
+  repeat
+    dup rot dup c@
+    dup if
+      rot
+      c! 1 + swap
+      1 +  0
+    else drop swap 1
+    then
+  until
+  drop drop
+;
+: concat ( concats strings )
+       over over count swap count +
+       rot rot swap 
+	5 heap-alloc  
+        cp cp swap - ;
