@@ -24,6 +24,9 @@ cp cp swap - ;
 		then 
 	until 
   drop ;
+: is_empty 
+    c@ 0 = ; 
+
 : string-copy 
 	repeat 
 	2dup 
@@ -88,7 +91,5 @@ else
 then
 ; IMMEDIATE 
 
-: string-empty? 
-    c@ 0 = ; 
 
 
