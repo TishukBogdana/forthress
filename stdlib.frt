@@ -1,13 +1,13 @@
-: IMMEDIATE  last_word @ cfa 1 - dup c@ 1 or swap c! ;
-
 : rot >r swap r> swap ;
 : -rot swap >r swap  r> ;
 
 : over >r dup r> swap ;
 : 2dup over over ;
+: 2drop drop drop ;
+: 2over >r >r dup r> swap r> swap ;
 
 : <> = not ;
-: <= 2dup < -rot =  lor ;
+: <= 2dup = -rot < lor ;
 : > <= not ;
 : >= < not ; 
 
@@ -18,6 +18,13 @@
 : MB KB KB  ;
 
 : allot dp @ swap over + dp ! ;
+: send
+	cell% allot
+	dup
+	rot swap
+	! 
+;
+: IMMEDIATE  last_word @ cfa 1 - dup c@ 1 or swap c! ;
 
 : begin here ; IMMEDIATE
 : again ' branch , , ; IMMEDIATE
@@ -30,6 +37,10 @@
 : repeat here ; IMMEDIATE
 : until  ' 0branch , , ; IMMEDIATE
 
+: case 0 ; IMMEDIATE
+: of ' over , ' = , ' if execute ' drop , ; IMMEDIATE
+: endof ' else execute ; IMMEDIATE
+: endcase ' drop , dup if repeat ' then execute dup not until drop then  ; IMMEDIATE
 
 : for 
       ' swap ,
@@ -90,26 +101,12 @@ here    0 ,
 
 : ( repeat readc 41 - not until ; IMMEDIATE
 
-( Now we can define comments :)
-
-
-: 2drop drop drop ;
-: 2over >r >r dup r> swap r> swap ;
-: case 0 ; IMMEDIATE
-: of ' over , ' = , ' if execute ' drop , ; IMMEDIATE
-: endof ' else execute ; IMMEDIATE
-: endcase ' drop , dup if repeat ' then execute dup not until drop then  ; IMMEDIATE
-
-
-( num from to -- 1/0)
 : in-range rot swap over >= -rot <= land ;
 
-( 1 if we are compiling )
 : compiling state @ ;
 
 : compnumber compiling if ' lit , , then ;
 
-( -- input character's code )
 : .' readc compnumber ; IMMEDIATE
 
 : readce readc dup .' \ = if
@@ -131,13 +128,7 @@ then
 readc dup 34 =
 if
   drop
-  0 c, ( null terminator )
-  ( label_to_link string_start )
-  swap
-  ( string_start label_to_link )
-  here swap !
-  ( string_start )
-  ' lit , , 1
+  0 c,   swap  here swap ! ' lit , , 1
 else c, 0
 then
     until
@@ -153,13 +144,7 @@ readce dup 34 = if drop 1 else emit 0 then
 readce dup 34 =
 if
   drop
-  0 c, ( null terminator )
-  ( label_to_link string_start )
-  swap
-  ( string_start label_to_link )
-  here swap !
-  ( string_start )
-  ' lit , , 1
+  0 c, swap here swap ! ' lit , , 1
 else c, 0
 then
       until
@@ -216,7 +201,6 @@ until
 compnumber
 ; IMMEDIATE
 
-( adds hexadecimal literals )
 : 0x 0
 repeat
 read-hex-digit dup -1 = if
@@ -229,14 +213,6 @@ until
 compnumber
 ; IMMEDIATE
 
-: send
-	cell% allot
-	dup
-	rot swap
-	! 
-;
-
-( File I/O )
 : O_APPEND 0x 400 ;
 : O_CREAT 0x 40 ;
 : O_TRUNC 0x 200 ;
@@ -256,13 +232,12 @@ compnumber
 : file-open-read  O_RDONLY 08x 700 sys-open ;
 : file-close sys-close drop ;
 
-( fd string - )
+
 : file-print count sys-write ;
 
 : include
     inbuf word drop
     inbuf file-open-append >r
-    ( place descriptor on top of data stack and interpret it )
     r@ interpret-fd
     r@ file-close
     r> drop ;
@@ -271,7 +246,6 @@ compnumber
 : global inbuf word drop 0  inbuf create ' docol @ , ' lit , cell% allot , ' exit ,  ;
 : constant inbuf word drop 0 inbuf create ' docol @ , ' lit , , ' exit , ;
 
-( structures )
 : struct 0 ;
 : field over inbuf word drop 0 inbuf create ' docol @ , ' lit , , ' + ,  ' exit , + ;
 : end-struct constant  ;
@@ -283,9 +257,10 @@ include documentation.frt
 16 MB ( heap size )
 include heap.frt
 drop
-
+include mathlib.frt
 include string.frt
 include hash.frt 
+include siri.frt
 
 : enum 0 repeat
     inbuf word drop dup
@@ -300,10 +275,8 @@ include recursion.frt
 include runtime-meta.frt
 include managed-string.frt
 
-." Forthress -- a tiny Forth from scratch > (c) Igor Zhirkov 2017-2018 " cr
+." Forthress -- a tiny Forth from scratch > (c) Igor Zhirkov and Tishuk Bogdana 2017-2018 " cr
 
-include fib.frt
 
-include native.frt
-include mathlib.frt
+
 

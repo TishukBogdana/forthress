@@ -63,7 +63,6 @@ global heap-size
         then
     then ;
 
-( a -- 1/0 )
 : chunk-try-merge >r
     r@ chunk-is-last not if  
         r@ >chunk-is-free @  r@ >chunk-next @ >chunk-is-free @ land if 
@@ -73,7 +72,6 @@ global heap-size
     else 0 then
     r> drop ;
 
-( a --  )
 : chunk-iterate-try-merge 
     dup chunk-try-merge if
         repeat
@@ -83,7 +81,6 @@ global heap-size
     else drop then 
 ;
 
-( sz - addr )
 : heap-first-free-of-size >r heap-start 
     repeat
     @ 
@@ -96,25 +93,21 @@ global heap-size
     r> drop ;
 
 
-( a query - 0/1 )
 : chunk-should-split swap 
     chunk-size chunk-min-size -  1 swap 
-    ( q 1 [size - minsize]  ) 
     in-range ;
 
-( a query  - )
 : chunk-split
     over + 
     dup chunk-init 
-    >r ( a, a2 )
-    dup >chunk-next @ ( a oldnext , a2 )
+    >r 
+    dup >chunk-next @ 
     r@ >chunk-next ! 
     r> swap >chunk-next ! 
 ;
 
-( sz - addr )
 : heap-alloc
-chunk-header% +  ( HERE ) 
+chunk-header% +  
 dup heap-first-free-of-size dup if 
         ( sz a )
         swap 2dup chunk-should-split  if 
@@ -132,8 +125,6 @@ dup heap-first-free-of-size dup if
 ( a - )
 : heap-free chunk-header% - chunk-mark-free ; 
 
-( should contain a printer of form: )
-( chunk-contents-addr *metainf -- )
 global heap-meta-printer
 
 : chunk-show
